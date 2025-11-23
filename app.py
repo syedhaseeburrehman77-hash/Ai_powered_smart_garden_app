@@ -3,7 +3,12 @@ Smart Garden App - Main Streamlit Application
 A comprehensive plant care app with AI-powered features
 """
 import streamlit as st
-st.write("Available Secret keys:",st.secrets.keys())
+# 🛑 REMOVE THESE 3 LINES AFTER FIXING
+st.write("Secrets found:", st.secrets.keys())
+if "groq_key" in st.secrets:
+    st.write("✅ Key is present!")
+else:
+    st.write("❌ Key is MISSING. Check spelling in Dashboard.")
 import os
 from datetime import datetime, timedelta
 from PIL import Image
@@ -1822,5 +1827,6 @@ if page != "🏠 Welcome":
         </p>
     </div>
     """, unsafe_allow_html=True)
+
 
 
