@@ -4,23 +4,6 @@ A comprehensive plant care app with AI-powered features
 """
 import streamlit as st
 import os
-
-# 1. Load the key from Streamlit secrets
-try:
-    # Check if the key exists in secrets
-    if "groq_key" in st.secrets:
-        api_key = st.secrets["groq_key"]
-        # 2. CRITICAL STEP: Set it as an Environment Variable for the library to find
-        os.environ["GROQ_API_KEY"] = api_key
-    else:
-        st.error("The secret 'groq_key' was not found in the Dashboard!")
-        st.stop()
-except Exception as e:
-    st.error(f"Error loading secrets: {e}")
-    st.stop()
-
-# ... your existing imports (like 'from groq import Groq') go here ...
-
 from datetime import datetime, timedelta
 from PIL import Image
 import io
@@ -59,6 +42,37 @@ st.set_page_config(
 # Load API keys from secrets or environment variables
 # This must be called after Streamlit is initialized
 load_api_keys()
+
+# CRITICAL: Load Groq API key from Streamlit secrets and set as environment variable
+# This ensures the Groq library can automatically find the key
+try:
+    # Check if the key exists in secrets (try multiple formats)
+    groq_key = None
+    
+    # Try nested format: st.secrets["api"]["groq_key"]
+    try:
+        if hasattr(st, 'secrets') and st.secrets:
+            if "api" in st.secrets:
+                groq_key = st.secrets["api"].get("groq_key") or st.secrets["api"].get("GROQ_KEY")
+    except:
+        pass
+    
+    # Try direct format: st.secrets["groq_key"]
+    if not groq_key:
+        try:
+            if hasattr(st, 'secrets') and st.secrets:
+                groq_key = st.secrets.get("groq_key") or st.secrets.get("GROQ_KEY")
+        except:
+            pass
+    
+    # If found, set as environment variable for Groq library
+    if groq_key:
+        os.environ["GROQ_API_KEY"] = groq_key
+        # Also update config to ensure consistency
+        config.GROQ_API_KEY = groq_key
+except Exception as e:
+    # Silently handle - will be caught by service layer
+    pass
 
 # Custom CSS for beautiful green-themed UI with animations
 st.markdown("""
@@ -1838,8 +1852,4 @@ if page != "🏠 Welcome":
         </p>
     </div>
     """, unsafe_allow_html=True)
-
-
-
-
 
