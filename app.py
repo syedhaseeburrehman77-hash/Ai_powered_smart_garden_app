@@ -3,12 +3,22 @@ Smart Garden App - Main Streamlit Application
 A comprehensive plant care app with AI-powered features
 """
 import streamlit as st
-# 🛑 REMOVE THESE 3 LINES AFTER FIXING
-st.write("Secrets found:", st.secrets.keys())
-if "groq_key" in st.secrets:
-    st.write("✅ Key is present!")
-else:
-    st.write("❌ Key is MISSING. Check spelling in Dashboard.")
+# --- DEBUG SECTION (Remove this later if you want) ---
+# This forces the app to use the key you just saved in the dashboard
+try:
+    if "groq_key" in st.secrets:
+        api_key = st.secrets["groq_key"]
+        st.success("✅ Key Successfully Loaded!")
+    else:
+        st.error("❌ The dashboard secret is still named wrong.")
+        st.stop()
+except FileNotFoundError:
+    st.error("❌ No secrets found at all. Did you hit SAVE in the dashboard?")
+    st.stop()
+# -----------------------------------------------------
+
+# Now use 'api_key' in your actual code below
+# Example: client = Groq(api_key=api_key)
 import os
 from datetime import datetime, timedelta
 from PIL import Image
@@ -1827,6 +1837,7 @@ if page != "🏠 Welcome":
         </p>
     </div>
     """, unsafe_allow_html=True)
+
 
 
 
