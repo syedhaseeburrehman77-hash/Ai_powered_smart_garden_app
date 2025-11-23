@@ -15,11 +15,15 @@ class GroqService:
     
     def _get_client(self):
         """Get or create Groq client - checks API key dynamically"""
+        import os
+        
         # Reload API keys to ensure we have the latest value
         load_api_keys()
         
-        # Check API key dynamically (in case it was added after service initialization)
-        api_key = config.GROQ_API_KEY
+        # Check API key from multiple sources (priority order):
+        # 1. Environment variable (set by app.py from Streamlit secrets)
+        # 2. config.GROQ_API_KEY (from config module)
+        api_key = os.getenv("GROQ_API_KEY") or config.GROQ_API_KEY
         
         # If we already have a client and the key exists, return it
         if self.client and api_key:
@@ -31,6 +35,8 @@ class GroqService:
         
         # Try to create client with the API key
         try:
+            # Groq library can also auto-detect from GROQ_API_KEY env var
+            # But we'll pass it explicitly for clarity
             self.client = Groq(api_key=api_key)
             return self.client
         except Exception as e:
@@ -46,6 +52,8 @@ class GroqService:
         # Get client dynamically (checks API key each time)
         client = self._get_client()
         if not client:
+            # Return helpful message but don't stop execution
+            # The chatbot will still work, just showing setup instructions
             return """🌱 **Groq API Not Configured**
 
 I'm here to help with your plant care questions! However, the Groq API key is not configured.
